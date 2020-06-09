@@ -6,7 +6,6 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
 import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.GET
 import retrofit2.http.Headers
 import retrofit2.http.Query
@@ -43,7 +42,6 @@ object ApiFactory {
     fun retrofit() : Retrofit = Retrofit.Builder()
         .client(client)
         .baseUrl("https://mashape-community-urban-dictionary.p.rapidapi.com")
-        .addConverterFactory(GsonConverterFactory.create())
         .addCallAdapterFactory(CoroutineCallAdapterFactory())
         .build()
 

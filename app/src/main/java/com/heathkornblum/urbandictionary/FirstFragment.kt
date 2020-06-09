@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import android.widget.Button
 import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.fragment.findNavController
+import kotlinx.android.synthetic.main.fragment_first.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -17,7 +18,10 @@ import kotlinx.coroutines.launch
  * A simple [Fragment] subclass as the default destination in the navigation.
  */
 class FirstFragment : Fragment() {
-    private lateinit var urbanDictionaryViewModel: UrbanDictionaryViewModel
+
+    private val udViewModel: UdViewModel by lazy {
+        ViewModelProviders.of(this).get(UdViewModel::class.java)
+    }
 
     override fun onCreateView(
             inflater: LayoutInflater, container: ViewGroup?,
@@ -33,10 +37,8 @@ class FirstFragment : Fragment() {
 
         val coroutineScope = CoroutineScope(Dispatchers.Default)
         coroutineScope.launch {
-            urbanDictionaryViewModel = ViewModelProviders.of(this@FirstFragment).get(UrbanDictionaryViewModel::class.java)
 
-            urbanDictionaryViewModel.fetchDefinitions()
-
+            udViewModel.fetchDefinitions()
 
         }
         view.findViewById<Button>(R.id.button_first).setOnClickListener {
