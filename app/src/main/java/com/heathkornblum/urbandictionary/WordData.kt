@@ -1,7 +1,7 @@
 package com.heathkornblum.urbandictionary
 
-data class FirstResponse(
-    val list: List<>
+data class Definitions(
+    val list: List<WordData>
 )
 
 data class WordData(

@@ -4,39 +4,34 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.google.gson.JsonObject
-import com.heathkornblum.urbandictionary.retrofit.ApiFactory
-import com.heathkornblum.urbandictionary.retrofit.TermRepository
 import com.heathkornblum.urbandictionary.retrofit.UdApi
-import com.heathkornblum.urbandictionary.retrofit.WordDefinition
-import kotlinx.coroutines.*
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import kotlin.coroutines.CoroutineContext
 
 class UdViewModel: ViewModel() {
 
-    private val _response = MutableLiveData<JsonObject>()
+    private val _response = MutableLiveData<Definitions>()
 
-    val response: LiveData<JsonObject>
+    val response: LiveData<Definitions>
         get() = _response
 
-    init {
-        fetchDefinitions()
-    }
+    var bodyString : String? = null
+
+    var listOfDefinitions :Definitions?  = null
 
     fun fetchDefinitions() {
         UdApi.retrofitService.defineWord("wat").enqueue(
-            object: Callback<JsonObject> {
-                override fun onFailure(call: Call<JsonObject>, t: Throwable) {
+            object: Callback<Definitions> {
+                override fun onFailure(call: Call<Definitions>, t: Throwable) {
                     Log.e("helphelp", t.message!!)
                 }
 
-                override fun onResponse(call: Call<JsonObject>, response: Response<JsonObject>) {
+                override fun onResponse(call: Call<Definitions>, response: Response<Definitions>) {
                     _response.value = response.body()
+                    bodyString = response.body()?.list?.get(0)?.definition
+                    listOfDefinitions = response.body()
                 }
-
             }
         )
     }
