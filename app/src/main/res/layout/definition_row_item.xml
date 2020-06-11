@@ -5,36 +5,39 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:padding="8dp"
     >
 
     <TextView
         android:id="@+id/definitionText"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:gravity="top|left"
         android:text="TextView"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/thumbsUpText"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        android:padding="8dp"
+        />
 
     <TextView
         android:id="@+id/thumbsDownText"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_width="@dimen/thumbs_width"
+        android:layout_height="0dp"
+        android:gravity="center|top"
+        android:padding="8dp"
         android:text="TextView"
-        android:textAlignment="center"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/thumbsUpText"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="3dp"
+        android:layout_width="@dimen/thumbs_width"
+        android:layout_height="0dp"
+        android:gravity="center|top"
+        android:padding="8dp"
         android:text="TextView"
-        android:textAlignment="center"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/thumbsDownText"
         app:layout_constraintTop_toTopOf="parent" />

@@ -1,5 +1,6 @@
 package com.heathkornblum.urbandictionary
 
+import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.TextView
@@ -24,14 +25,15 @@ class DefinitionsListAdapter(private val definitions: Definitions?) : RecyclerVi
     }
 
     override fun onBindViewHolder(holder: DefinitionsViewHolder, position: Int) {
-//        holder.itemView.layoutParams =
         val defParts = termDefs?.get(position)
         holder.defText.text = defParts?.definition
         holder.thumbsDownText.text = defParts?.thumbs_down.toString()
         holder.thumbsUpText.text = defParts?.thumbs_up.toString()
-
-//        holder.defView.
-//         = definitions?.list?.get(position)?.definition
+        if (position % 2 == 0) {
+            holder.defText.setBackgroundColor(Color.parseColor("#DDDDDD"))
+            holder.thumbsDownText.setBackgroundColor(Color.parseColor("#DDDDDD"))
+            holder.thumbsUpText.setBackgroundColor(Color.parseColor("#DDDDDD"))
+        }
     }
 
     override fun getItemCount(): Int = definitions?.list?.size ?: 0

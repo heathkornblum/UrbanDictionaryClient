@@ -31,7 +31,7 @@ interface UdApiService {
     )
 
     @GET("define")
-    fun defineWord(@Query("term") term: String) : Call<Definitions>
+    fun defineWord(@Query("term") term: String?) : Call<Definitions>
 }
 
 object UdApi {

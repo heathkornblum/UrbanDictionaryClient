@@ -9,4 +9,9 @@
 
     <string name="hello_first_fragment">Hello first fragment</string>
     <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
+    <string name="app_label">Urban Dictionary</string>
+    <string name="search_hint">Search Urban Dictionary</string>
+    <string name="clear_search">clear search</string>
+    <string name="thumbs_up">👍</string>
+    <string name="thumbs_down">👎</string>
 </resources>

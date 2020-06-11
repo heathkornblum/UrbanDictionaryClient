@@ -1,6 +1,7 @@
 package com.heathkornblum.urbandictionary
 
 import android.util.Log
+import android.widget.ProgressBar
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -16,23 +17,35 @@ class UdViewModel: ViewModel() {
     val response: LiveData<Definitions>
         get() = _response
 
-    var bodyString : String? = null
+    var lastLookup : String? = null
 
-    var listOfDefinitions :Definitions?  = null
+    var listOfDefinitions = MutableLiveData<Definitions>()
 
-    fun fetchDefinitions() {
-        UdApi.retrofitService.defineWord("wat").enqueue(
-            object: Callback<Definitions> {
-                override fun onFailure(call: Call<Definitions>, t: Throwable) {
-                    Log.e("helphelp", t.message!!)
+    var status = MutableLiveData<Progress>()
+
+    enum class Progress {
+        LOADING, FINISHED, ERROR
+    }
+
+    fun fetchDefinitions(lookupTerm: String? = lastLookup) {
+        status.value = Progress.LOADING
+        // if there is no lookup string, do nothing
+        lookupTerm?.let {
+            UdApi.retrofitService.defineWord(lookupTerm).enqueue(
+                object: Callback<Definitions> {
+                    override fun onFailure(call: Call<Definitions>, t: Throwable) {
+                        status.value = Progress.ERROR
+                    }
+
+                    override fun onResponse(call: Call<Definitions>, response: Response<Definitions>) {
+                        _response.value = response.body()
+                        listOfDefinitions.value = response.body()
+                        lastLookup = lookupTerm
+                        status.value = Progress.FINISHED
+                    }
                 }
+            )
+        }
 
-                override fun onResponse(call: Call<Definitions>, response: Response<Definitions>) {
-                    _response.value = response.body()
-                    bodyString = response.body()?.list?.get(0)?.definition
-                    listOfDefinitions = response.body()
-                }
-            }
-        )
     }
 }
