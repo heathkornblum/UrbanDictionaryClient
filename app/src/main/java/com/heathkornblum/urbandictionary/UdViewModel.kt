@@ -16,8 +16,8 @@ class UdViewModel: ViewModel() {
     private val _response = MutableLiveData<Definitions>()
 
     var lastLookup : String? = null
-    var thumbsUpSearch = true
-    var descendingSearch = true
+    var thumbsUpSearch : Boolean? = null
+    var ascendingSearch : Boolean? = null
 
     var listOfDefinitions = MutableLiveData<List<WordData>>()
 
@@ -36,6 +36,7 @@ class UdViewModel: ViewModel() {
                     override fun onResponse(call: Call<Definitions>, response: Response<Definitions>) {
                         _response.value = response.body()
                         listOfDefinitions.value = response.body()?.list
+                        sortWordsByThumbs(thumbsUpSearch, ascendingSearch)
                         lastLookup = lookupTerm
                         status.value = Progress.FINISHED
                     }
@@ -45,24 +46,25 @@ class UdViewModel: ViewModel() {
 
     }
 
-    fun sortWordsByThumbs(thumbsUpOrDown: Boolean = true, descending: Boolean = true) {
+    fun sortWordsByThumbs(thumbsUpOrDown: Boolean?, descending: Boolean?) {
         // true for thumbs up, false for thumbs down
 
         listOfDefinitions.value = when (thumbsUpOrDown) {
             true -> {
-                if (descending) {
-                    listOfDefinitions.value?.sortedByDescending { it.thumbs_up }
-                } else {
-                    listOfDefinitions.value?.sortedBy { it.thumbs_up }
+                when (descending) {
+                    true -> listOfDefinitions.value?.sortedByDescending { it.thumbs_up }
+                    false -> listOfDefinitions.value?.sortedBy { it.thumbs_up }
+                    null -> listOfDefinitions.value?.sortedByDescending { it.thumbs_up }
                 }
             }
             false -> {
-                if (descending) {
-                    listOfDefinitions.value?.sortedByDescending { it.thumbs_down }
-                } else {
-                    listOfDefinitions.value?.sortedBy { it.thumbs_down }
+                when (descending) {
+                    true -> listOfDefinitions.value?.sortedByDescending { it.thumbs_down }
+                    false -> listOfDefinitions.value?.sortedBy { it.thumbs_down }
+                    null -> listOfDefinitions.value?.sortedByDescending { it.thumbs_down }
                 }
             }
+            null -> listOfDefinitions.value?.sortedByDescending { it.thumbs_up }
         }
     }
 }

@@ -14,10 +14,6 @@ import retrofit2.http.Query
 
 private const val BASE_URL = "https://mashape-community-urban-dictionary.p.rapidapi.com/"
 
-private val moshi = Moshi.Builder()
-    .add(KotlinJsonAdapterFactory())
-    .build()
-
 private val retrofit = Retrofit.Builder()
     .addConverterFactory(GsonConverterFactory.create())
     .addCallAdapterFactory(CoroutineCallAdapterFactory())
@@ -30,9 +26,14 @@ interface UdApiService {
         "x-rapidapi-key: c1d3005e65msh141ea52bae130d2p1a11dbjsn45ba3a70c455"
     )
 
+    /**
+     * Set the search term
+     * @param term The term to look up
+     */
     @GET("define")
     fun defineWord(@Query("term") term: String?) : Call<Definitions>
 }
+
 
 object UdApi {
     val retrofitService : UdApiService by lazy {

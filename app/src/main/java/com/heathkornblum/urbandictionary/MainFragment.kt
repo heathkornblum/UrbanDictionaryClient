@@ -12,6 +12,7 @@ import android.widget.Button
 import android.widget.ProgressBar
 import android.widget.SearchView
 import android.widget.TextView
+import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -37,8 +38,12 @@ class MainFragment : Fragment() {
 
     private var defsList: List<WordData>? = null
 
+    // short term reference to sorting style
     private var ascending = true
-    private var byThumbsUp = true
+
+    // unicode arrows for sorting UI
+    private var upArrow = "\u25b2"
+    private var downArrow = "\u25bc"
 
     override fun onCreateView(
             inflater: LayoutInflater, container: ViewGroup?,
@@ -54,7 +59,12 @@ class MainFragment : Fragment() {
         viewManager = LinearLayoutManager(this.context)
 
         val termObserver = Observer<List<WordData>> {
+
+            // This is a bit heavy, next time around will use notifyDataSetChanged() on the adapter.
+            // Currently losing reference to Adapter's data because the data is changed by assignment rather
+            // than by using member functions to clear() and addAll() in the View Model.
             recyclerView.adapter = DefinitionsListAdapter(udViewModel.listOfDefinitions.value)
+            setArrowIcons()
         }
 
         recyclerView = rootView.findViewById<RecyclerView>(R.id.terms_recycler_view).apply {
@@ -76,15 +86,13 @@ class MainFragment : Fragment() {
                 UdViewModel.Progress.ERROR -> {
                     progressBar.visibility = View.GONE
                 }
+                null -> {
+                    progressBar.visibility = View.GONE
+                }
             }
-
         }
 
         udViewModel.status.observe(this.viewLifecycleOwner, progressObserver)
-
-
-
-
 
         val searchView = rootView.findViewById<SearchView>(R.id.searchView)
         searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
@@ -126,14 +134,32 @@ class MainFragment : Fragment() {
 
         val thumbsUp = rootView.findViewById<TextView>(R.id.thumbsupHeading)
         thumbsUp.setOnClickListener {
-            udViewModel.sortWordsByThumbs(true, !ascending)
-            ascending = !ascending
+            if (!udViewModel.listOfDefinitions.value.isNullOrEmpty()) {
+                // sort by and then set ascending value to it's current opposite
+                udViewModel.sortWordsByThumbs(true, !ascending)
+                ascending = !ascending
+                thumbsUpArrow.text = if (ascending) {upArrow} else {downArrow}
+                thumbsUpArrow.visibility = View.VISIBLE
+                thumbsDownArrow.visibility = View.INVISIBLE
+                udViewModel.ascendingSearch = ascending
+                udViewModel.thumbsUpSearch = true
+            }
         }
 
         val thumbsDown = rootView.findViewById<TextView>(R.id.thumbsdownHeading)
         thumbsDown.setOnClickListener {
-            udViewModel.sortWordsByThumbs(false, !ascending)
-            ascending = !ascending
+            if (!udViewModel.listOfDefinitions.value.isNullOrEmpty()) {
+                // sort by and then set ascending value to it's current opposite
+                udViewModel.sortWordsByThumbs(false, !ascending)
+                ascending = !ascending
+                thumbsDownArrow.text = if (ascending) {upArrow} else {downArrow}
+                thumbsDownArrow.visibility = View.VISIBLE
+                thumbsUpArrow.visibility = View.INVISIBLE
+                udViewModel.ascendingSearch = ascending
+                udViewModel.thumbsUpSearch = false
+
+            }
+
         }
 
         return rootView
@@ -141,34 +167,54 @@ class MainFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        (activity as FragmentActivity).actionBar?.title = "hello"
     }
-
 
     override fun onResume() {
         // Don't search for nothing
-        if (!udViewModel.lastLookup.isNullOrEmpty()) {
+        if (!udViewModel.listOfDefinitions.value.isNullOrEmpty()) {
             val job = coroutineScope.launch {
                 // this keeps state between events such as screen rotation
                 udViewModel.fetchDefinitions(udViewModel.lastLookup)
+                setArrowIcons()
             }
         }
         super.onResume()
     }
 
-//    private fun sortByThumbs(listOfWords: List<WordData>?, upOrDown: Int) : List<WordData>? {
-//        return when (upOrDown) {
-//            0 -> {
-//                listOfWords?.sortedBy { it.thumbs_up }
-//            }
-//            1 -> {
-//                listOfWords?.sortedBy { it.thumbs_down }
-//            }
-//            else -> listOfWords?.sortedBy { it.thumbs_up }
-//        }
-//    }
+    /**
+     * Assure that arrows show after configuration change, or hide them when there is no data
+     */
+    private fun setArrowIcons() {
+        if (!udViewModel.listOfDefinitions.value.isNullOrEmpty()) {
+            if (udViewModel.thumbsUpSearch == true) {
+                thumbsUpArrow.text = if (udViewModel.ascendingSearch == true) {upArrow} else {downArrow}
+                thumbsUpArrow.visibility = View.VISIBLE
+                thumbsDownArrow.visibility = View.INVISIBLE
+            } else if (udViewModel.thumbsUpSearch == false) {
+                thumbsDownArrow.text = if (udViewModel.ascendingSearch == true) {upArrow} else {downArrow}
+                thumbsDownArrow.visibility = View.VISIBLE
+                thumbsUpArrow.visibility = View.INVISIBLE
+            }
+        } else {
+            // make arrows disappear if there are no definitions to show
+            thumbsDownArrow.visibility = View.INVISIBLE
+            thumbsUpArrow.visibility = View.INVISIBLE
+            udViewModel.thumbsUpSearch = null
+        }
 
+    }
+
+    /**
+     * hide the keyboard, catch the error if Input Method Service is null
+     */
     private fun hideKeyboard() {
-        val systemService: InputMethodManager = activity?.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-        systemService.hideSoftInputFromWindow(searchView.windowToken, 0)
+        try {
+            val systemService: InputMethodManager = activity?.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+            systemService.hideSoftInputFromWindow(searchView.windowToken, 0)
+        } catch (e: TypeCastException) {
+            // Do nothing on exception
+        }
+
     }
 }
