@@ -1,7 +1,5 @@
 package com.heathkornblum.urbandictionary
 
-import android.util.Log
-import android.widget.ProgressBar
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -11,21 +9,19 @@ import retrofit2.Callback
 import retrofit2.Response
 
 class UdViewModel: ViewModel() {
-
-    private val _response = MutableLiveData<Definitions>()
-
-    val response: LiveData<Definitions>
-        get() = _response
-
-    var lastLookup : String? = null
-
-    var listOfDefinitions = MutableLiveData<Definitions>()
-
-    var status = MutableLiveData<Progress>()
-
     enum class Progress {
         LOADING, FINISHED, ERROR
     }
+
+    private val _response = MutableLiveData<Definitions>()
+
+    var lastLookup : String? = null
+    var thumbsUpSearch = true
+    var descendingSearch = true
+
+    var listOfDefinitions = MutableLiveData<List<WordData>>()
+
+    var status = MutableLiveData<Progress>()
 
     fun fetchDefinitions(lookupTerm: String? = lastLookup) {
         status.value = Progress.LOADING
@@ -39,7 +35,7 @@ class UdViewModel: ViewModel() {
 
                     override fun onResponse(call: Call<Definitions>, response: Response<Definitions>) {
                         _response.value = response.body()
-                        listOfDefinitions.value = response.body()
+                        listOfDefinitions.value = response.body()?.list
                         lastLookup = lookupTerm
                         status.value = Progress.FINISHED
                     }
@@ -47,5 +43,26 @@ class UdViewModel: ViewModel() {
             )
         }
 
+    }
+
+    fun sortWordsByThumbs(thumbsUpOrDown: Boolean = true, descending: Boolean = true) {
+        // true for thumbs up, false for thumbs down
+
+        listOfDefinitions.value = when (thumbsUpOrDown) {
+            true -> {
+                if (descending) {
+                    listOfDefinitions.value?.sortedByDescending { it.thumbs_up }
+                } else {
+                    listOfDefinitions.value?.sortedBy { it.thumbs_up }
+                }
+            }
+            false -> {
+                if (descending) {
+                    listOfDefinitions.value?.sortedByDescending { it.thumbs_down }
+                } else {
+                    listOfDefinitions.value?.sortedBy { it.thumbs_down }
+                }
+            }
+        }
     }
 }

@@ -1,11 +1,13 @@
 package com.heathkornblum.urbandictionary
 
+import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.InputMethodManager
 import android.widget.Button
 import android.widget.ProgressBar
 import android.widget.SearchView
@@ -15,9 +17,8 @@ import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.fragment_main.*
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
+import java.util.concurrent.TimeUnit
 
 class MainFragment : Fragment() {
 
@@ -25,6 +26,7 @@ class MainFragment : Fragment() {
     private lateinit var recyclerView: RecyclerView
     private lateinit var viewAdapter: RecyclerView.Adapter<*>
     private lateinit var viewManager: RecyclerView.LayoutManager
+    private var keyboardJob: Job? = null
 
     // A reference for finding views on this fragment
     private lateinit var rootView: View
@@ -33,6 +35,10 @@ class MainFragment : Fragment() {
     private val coroutineScope = CoroutineScope(Dispatchers.Main)
     private lateinit var progressBar: ProgressBar
 
+    private var defsList: List<WordData>? = null
+
+    private var ascending = true
+    private var byThumbsUp = true
 
     override fun onCreateView(
             inflater: LayoutInflater, container: ViewGroup?,
@@ -42,10 +48,12 @@ class MainFragment : Fragment() {
         rootView = inflater.inflate(R.layout.fragment_main, container, false)
         progressBar = rootView.findViewById(R.id.progressBar)
 
-        viewAdapter = DefinitionsListAdapter(udViewModel.listOfDefinitions.value)
+        defsList = udViewModel.listOfDefinitions.value
+
+        viewAdapter = DefinitionsListAdapter(defsList)
         viewManager = LinearLayoutManager(this.context)
 
-        val termObserver = Observer<Definitions> {
+        val termObserver = Observer<List<WordData>> {
             recyclerView.adapter = DefinitionsListAdapter(udViewModel.listOfDefinitions.value)
         }
 
@@ -77,6 +85,7 @@ class MainFragment : Fragment() {
 
 
 
+
         val searchView = rootView.findViewById<SearchView>(R.id.searchView)
         searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextChange(newText: String?): Boolean {
@@ -85,8 +94,21 @@ class MainFragment : Fragment() {
                     " "
                 } else newText
 
-                coroutineScope.launch {
+
+                val fetchJob = coroutineScope.launch {
                     udViewModel.fetchDefinitions(searchText)
+                    // cancel the keyboard hiding job if it is currently running
+                    keyboardJob?.let {
+                        if (it.isActive) {
+                            it.cancel()
+                        }
+                    }
+
+                    // keyboard hides 3 seconds after adding a new letter to the search
+                    keyboardJob = coroutineScope.launch {
+                        delay(3000)
+                        hideKeyboard()
+                    }
                 }
                 return true
             }
@@ -95,12 +117,25 @@ class MainFragment : Fragment() {
                 coroutineScope.launch {
                     udViewModel.fetchDefinitions(query)
                     udViewModel.lastLookup = query
+                    hideKeyboard()
+
                 }
                 return true
             }
         })
 
-        // Inflate the layout for this fragment
+        val thumbsUp = rootView.findViewById<TextView>(R.id.thumbsupHeading)
+        thumbsUp.setOnClickListener {
+            udViewModel.sortWordsByThumbs(true, !ascending)
+            ascending = !ascending
+        }
+
+        val thumbsDown = rootView.findViewById<TextView>(R.id.thumbsdownHeading)
+        thumbsDown.setOnClickListener {
+            udViewModel.sortWordsByThumbs(false, !ascending)
+            ascending = !ascending
+        }
+
         return rootView
     }
 
@@ -112,11 +147,28 @@ class MainFragment : Fragment() {
     override fun onResume() {
         // Don't search for nothing
         if (!udViewModel.lastLookup.isNullOrEmpty()) {
-            coroutineScope.launch {
+            val job = coroutineScope.launch {
+                // this keeps state between events such as screen rotation
                 udViewModel.fetchDefinitions(udViewModel.lastLookup)
             }
         }
         super.onResume()
     }
 
+//    private fun sortByThumbs(listOfWords: List<WordData>?, upOrDown: Int) : List<WordData>? {
+//        return when (upOrDown) {
+//            0 -> {
+//                listOfWords?.sortedBy { it.thumbs_up }
+//            }
+//            1 -> {
+//                listOfWords?.sortedBy { it.thumbs_down }
+//            }
+//            else -> listOfWords?.sortedBy { it.thumbs_up }
+//        }
+//    }
+
+    private fun hideKeyboard() {
+        val systemService: InputMethodManager = activity?.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        systemService.hideSoftInputFromWindow(searchView.windowToken, 0)
+    }
 }

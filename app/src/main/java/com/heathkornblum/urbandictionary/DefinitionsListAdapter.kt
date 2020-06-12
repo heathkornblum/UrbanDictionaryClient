@@ -7,9 +7,7 @@ import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.RecyclerView
 
-class DefinitionsListAdapter(private val definitions: Definitions?) : RecyclerView.Adapter<DefinitionsListAdapter.DefinitionsViewHolder>() {
-
-    val termDefs = definitions?.list
+class DefinitionsListAdapter(private val definitions: List<WordData>?) : RecyclerView.Adapter<DefinitionsListAdapter.DefinitionsViewHolder>() {
 
     class DefinitionsViewHolder(val defView: ConstraintLayout) : RecyclerView.ViewHolder(defView) {
         val defText : TextView = defView.findViewById(R.id.definitionText)
@@ -25,7 +23,7 @@ class DefinitionsListAdapter(private val definitions: Definitions?) : RecyclerVi
     }
 
     override fun onBindViewHolder(holder: DefinitionsViewHolder, position: Int) {
-        val defParts = termDefs?.get(position)
+        val defParts = definitions?.get(position)
         holder.defText.text = defParts?.definition
         holder.thumbsDownText.text = defParts?.thumbs_down.toString()
         holder.thumbsUpText.text = defParts?.thumbs_up.toString()
@@ -36,6 +34,6 @@ class DefinitionsListAdapter(private val definitions: Definitions?) : RecyclerVi
         }
     }
 
-    override fun getItemCount(): Int = definitions?.list?.size ?: 0
+    override fun getItemCount(): Int = definitions?.size ?: 0
 
 }
