@@ -35,6 +35,11 @@ android {
         jvmTarget = "1.8"
     }
 
+    testOptions.unitTests {
+        includeAndroidResources = true
+        returnDefaultValues = true
+
+    }
 }
 
 dependencies {
@@ -60,6 +65,18 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
+    testImplementation 'androidx.test:core:1.2.0'
+    testImplementation 'org.mockito:mockito-core:2.19.0'
+    testImplementation "org.robolectric:robolectric:4.3.1"
+    androidTestImplementation 'androidx.test:runner:1.2.0'
+    androidTestImplementation 'androidx.test:rules:1.2.0'
+    // Hamcrest library
+    androidTestImplementation 'org.hamcrest:hamcrest-library:1.3'
+    // UI testing with Espresso
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
+    // UI testing with UI Automator
+    androidTestImplementation 'androidx.test.uiautomator:uiautomator:2.2.0'
+
 
     // Gson
     implementation 'com.google.code.gson:gson:2.8.5'
@@ -84,6 +101,13 @@ dependencies {
 
     // Recycler View
     implementation 'androidx.recyclerview:recyclerview:1.1.0'
+
+    // AndroidX Test - JVM testing
+    testImplementation "androidx.test.ext:junit-ktx:1.1.1"
+    testImplementation "androidx.test:core-ktx:1.2.0"
+    testImplementation "org.robolectric:robolectric:4.3.1"
+
+    testImplementation "androidx.arch.core:core-testing:2.1.0"
 
 
 }

@@ -165,11 +165,6 @@ class MainFragment : Fragment() {
         return rootView
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        (activity as FragmentActivity).actionBar?.title = "hello"
-    }
-
     override fun onResume() {
         // Don't search for nothing
         if (!udViewModel.listOfDefinitions.value.isNullOrEmpty()) {

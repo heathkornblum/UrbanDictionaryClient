@@ -24,7 +24,8 @@
             android:layout_height="wrap_content"
             android:background="@color/ic_launcher_background"
             app:popupTheme="@style/AppTheme.PopupOverlay"
-            app:title="@string/app_name" />
+            app:title="@string/app_name"
+            app:titleTextColor="#000000" />
 
     </com.google.android.material.appbar.AppBarLayout>
 

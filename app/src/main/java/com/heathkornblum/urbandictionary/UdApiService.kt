@@ -1,16 +1,12 @@
-package com.heathkornblum.urbandictionary.retrofit
+package com.heathkornblum.urbandictionary
 
-import com.heathkornblum.urbandictionary.Definitions
 import com.jakewharton.retrofit2.adapter.kotlin.coroutines.CoroutineCallAdapterFactory
-import com.squareup.moshi.Moshi
-import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import retrofit2.Call
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.GET
 import retrofit2.http.Headers
 import retrofit2.http.Query
-//import retrofit2.converter.moshi.MoshiConverterFactory
 
 private const val BASE_URL = "https://mashape-community-urban-dictionary.p.rapidapi.com/"
 
