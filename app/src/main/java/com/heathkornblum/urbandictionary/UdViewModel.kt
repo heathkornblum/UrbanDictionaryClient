@@ -23,6 +23,9 @@ class UdViewModel: ViewModel() {
 
     var status = MutableLiveData<Progress>()
 
+
+    // This should be in a repository, especially if storing in a DB or file for later use.
+    // For now, this will do.
     fun fetchDefinitions(lookupTerm: String? = lastLookup) {
         status.value = Progress.LOADING
         // if there is no lookup string, do nothing
